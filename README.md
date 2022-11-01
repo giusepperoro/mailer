@@ -1,1 +1,1 @@
-# mailer
+# github.com/giusepperoro/mailer
