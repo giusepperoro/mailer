@@ -2,13 +2,13 @@ package workerpool
 
 import (
 	"github.com/giusepperoro/mailer/internals/database"
-	"github.com/giusepperoro/mailer/internals/proccesor"
+	"github.com/giusepperoro/mailer/internals/entity"
 	"github.com/giusepperoro/mailer/internals/transactionresponse"
 	"log"
 )
 
 type Worker interface {
-	Add(ch chan proccesor.Task)
+	Add(ch chan entity.Task)
 }
 
 type Work struct {
@@ -23,7 +23,7 @@ func NewWorker(db database.DbManager, sr transactionresponse.ResponseSender) *Wo
 	}
 }
 
-func (w *Work) Add(ch chan proccesor.Task) {
+func (w *Work) Add(ch chan entity.Task) {
 	go func() {
 		for task := range ch {
 			answer, err := w.db.ChangeBalance(task.Ctx, task.ClientId, task.Amount)

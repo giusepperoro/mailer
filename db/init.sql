@@ -1,4 +1,4 @@
-create extension if not exists pg_stat_statements;
+ create extension if not exists pg_stat_statements;
 
 -- creation of account table
 -- Creation of accounts table
@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS accounts (
     PRIMARY KEY(client_id)
     );
 
-CREATE INDEX IF NOT EXISTS client_id on accounts;
+INSERT INTO accounts (balance) VALUES (
+    5000
+    );
 
 -- Creation of orders table
 CREATE TABLE IF NOT EXISTS orders (

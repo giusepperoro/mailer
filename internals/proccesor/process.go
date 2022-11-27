@@ -2,15 +2,16 @@ package proccesor
 
 import (
 	"context"
+	"github.com/giusepperoro/mailer/internals/entity"
 	"github.com/giusepperoro/mailer/internals/workerpool"
 	"net/http"
 )
 
 const defaultSize = 10
 
-func NewProcces(work workerpool.Worker) *Pros {
+func NewProcessor(work workerpool.Worker) *Pros {
 	return &Pros{
-		tuskMap: make(map[int64]chan Task),
+		taskMap: make(map[int64]chan entity.Task),
 		work:    work,
 	}
 }
@@ -19,16 +20,16 @@ func (p *Pros) Process(ctx context.Context, w http.ResponseWriter, clientId, amo
 	if p.isClosed {
 		return
 	}
-	ch, exists := p.tuskMap[clientId]
+	ch, exists := p.taskMap[clientId]
 	if !exists {
-		ch = make(chan Task, defaultSize)
-		p.tuskMap[clientId] = ch
-		p.work.Add(p.tuskMap[clientId])
+		ch = make(chan entity.Task, defaultSize)
+		p.taskMap[clientId] = ch
+		p.work.Add(p.taskMap[clientId])
 	}
 	if p.isClosed {
 		return
 	}
-	ch <- Task{
+	ch <- entity.Task{
 		Ctx:      ctx,
 		ClientId: clientId,
 		Amount:   amount,
@@ -38,7 +39,7 @@ func (p *Pros) Process(ctx context.Context, w http.ResponseWriter, clientId, amo
 
 func (p *Pros) Close() {
 	p.isClosed = true
-	for _, ch := range p.tuskMap {
+	for _, ch := range p.taskMap {
 		close(ch)
 	}
 }

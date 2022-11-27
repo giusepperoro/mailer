@@ -2,6 +2,7 @@ package proccesor
 
 import (
 	"context"
+	"github.com/giusepperoro/mailer/internals/entity"
 	"github.com/giusepperoro/mailer/internals/workerpool"
 	"net/http"
 )
@@ -12,14 +13,7 @@ type Processor interface {
 }
 
 type Pros struct {
-	tuskMap  map[int64]chan Task
+	taskMap  map[int64]chan entity.Task
 	isClosed bool
 	work     workerpool.Worker
-}
-
-type Task struct {
-	Ctx      context.Context
-	ClientId int64
-	Amount   int64
-	W        http.ResponseWriter
 }

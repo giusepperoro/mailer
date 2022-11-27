@@ -9,17 +9,21 @@ import (
 	"github.com/giusepperoro/mailer/internals/workerpool"
 	"log"
 	"net/http"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 	db, err := database.New(ctx)
 	if err != nil {
+		log.Println(err)
 		log.Fatal("database connect error")
 	}
 	sender := transactionresponse.NewSender()
 	wr := workerpool.NewWorker(db, sender)
-	pr := proccesor.NewProcces(wr)
+	pr := proccesor.NewProcessor(wr)
 	http.HandleFunc("/form", handlers.HandleBalanceChanger(pr))
 	err = http.ListenAndServe("0.0.0.0:80", nil)
 	log.Fatal("err here`:", err)
