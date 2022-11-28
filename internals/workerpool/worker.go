@@ -1,34 +1,38 @@
 package workerpool
 
 import (
-	"github.com/giusepperoro/mailer/internals/database"
-	"github.com/giusepperoro/mailer/internals/entity"
-	"github.com/giusepperoro/mailer/internals/transactionresponse"
+	"fmt"
 	"log"
+
+	"github.com/giusepperoro/requestqueue/internals/database"
+	"github.com/giusepperoro/requestqueue/internals/entity"
 )
 
 type Worker interface {
-	Add(ch chan entity.Task)
+	Add(queue entity.Queue)
 }
 
 type Work struct {
 	db database.DbManager
-	sr transactionresponse.ResponseSender
 }
 
-func NewWorker(db database.DbManager, sr transactionresponse.ResponseSender) *Work {
+func NewWorker(db database.DbManager) *Work {
 	return &Work{
 		db: db,
-		sr: sr,
 	}
 }
 
-func (w *Work) Add(ch chan entity.Task) {
-	go func() {
-		for task := range ch {
+func (w *Work) Add(queue entity.Queue) {
+	fmt.Println("added...")
+	go func(queue entity.Queue) {
+		for task := range queue.TaskChan {
+			fmt.Println("got some!")
 			answer, err := w.db.ChangeBalance(task.Ctx, task.ClientId, task.Amount)
-			w.sr.SendResponse(task.W, answer)
-			log.Println(err)
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Println("sending ans back...")
+			task.ResultChan <- answer
 		}
-	}()
+	}(queue)
 }

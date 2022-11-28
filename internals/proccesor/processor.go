@@ -2,9 +2,11 @@ package proccesor
 
 import (
 	"context"
-	"github.com/giusepperoro/mailer/internals/entity"
-	"github.com/giusepperoro/mailer/internals/workerpool"
 	"net/http"
+
+	"github.com/giusepperoro/requestqueue/internals/entity"
+	"github.com/giusepperoro/requestqueue/internals/response"
+	"github.com/giusepperoro/requestqueue/internals/workerpool"
 )
 
 type Processor interface {
@@ -13,7 +15,8 @@ type Processor interface {
 }
 
 type Pros struct {
-	taskMap  map[int64]chan entity.Task
+	taskMap  map[int64]entity.Queue
 	isClosed bool
 	work     workerpool.Worker
+	sender   response.ResponseSender
 }

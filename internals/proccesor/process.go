@@ -2,17 +2,21 @@ package proccesor
 
 import (
 	"context"
-	"github.com/giusepperoro/mailer/internals/entity"
-	"github.com/giusepperoro/mailer/internals/workerpool"
+	"fmt"
 	"net/http"
+
+	"github.com/giusepperoro/requestqueue/internals/entity"
+	"github.com/giusepperoro/requestqueue/internals/response"
+	"github.com/giusepperoro/requestqueue/internals/workerpool"
 )
 
 const defaultSize = 10
 
-func NewProcessor(work workerpool.Worker) *Pros {
+func NewProcessor(work workerpool.Worker, sender response.ResponseSender) *Pros {
 	return &Pros{
-		taskMap: make(map[int64]chan entity.Task),
+		taskMap: make(map[int64]entity.Queue),
 		work:    work,
+		sender:  sender,
 	}
 }
 
@@ -20,26 +24,35 @@ func (p *Pros) Process(ctx context.Context, w http.ResponseWriter, clientId, amo
 	if p.isClosed {
 		return
 	}
-	ch, exists := p.taskMap[clientId]
+	queue, exists := p.taskMap[clientId]
 	if !exists {
-		ch = make(chan entity.Task, defaultSize)
-		p.taskMap[clientId] = ch
+		taskChan := make(chan entity.Task, defaultSize)
+		queue = entity.Queue{
+			TaskChan: taskChan,
+		}
+		p.taskMap[clientId] = queue
 		p.work.Add(p.taskMap[clientId])
 	}
 	if p.isClosed {
 		return
 	}
-	ch <- entity.Task{
-		Ctx:      ctx,
-		ClientId: clientId,
-		Amount:   amount,
-		W:        w,
+	fmt.Println("sending data...")
+	resultChan := make(chan bool)
+	queue.TaskChan <- entity.Task{
+		ResultChan: resultChan,
+		Ctx:        ctx,
+		ClientId:   clientId,
+		Amount:     amount,
 	}
+	fmt.Println("ans recieved!")
+	res := <-resultChan
+	close(resultChan)
+	p.sender.SendResponse(w, res)
 }
 
 func (p *Pros) Close() {
 	p.isClosed = true
-	for _, ch := range p.taskMap {
-		close(ch)
+	for _, queue := range p.taskMap {
+		close(queue.TaskChan)
 	}
 }

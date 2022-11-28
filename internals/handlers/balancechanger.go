@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/giusepperoro/mailer/internals/proccesor"
+	"github.com/giusepperoro/requestqueue/internals/proccesor"
 	"io"
 	"net/http"
 )

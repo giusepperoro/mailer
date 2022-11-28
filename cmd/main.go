@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
-	"github.com/giusepperoro/mailer/internals/database"
-	"github.com/giusepperoro/mailer/internals/handlers"
-	"github.com/giusepperoro/mailer/internals/proccesor"
-	"github.com/giusepperoro/mailer/internals/transactionresponse"
-	"github.com/giusepperoro/mailer/internals/workerpool"
 	"log"
 	"net/http"
 	"os/signal"
 	"syscall"
+
+	"github.com/giusepperoro/requestqueue/internals/database"
+	"github.com/giusepperoro/requestqueue/internals/handlers"
+	"github.com/giusepperoro/requestqueue/internals/proccesor"
+	"github.com/giusepperoro/requestqueue/internals/response"
+	"github.com/giusepperoro/requestqueue/internals/workerpool"
 )
 
 func main() {
@@ -21,9 +22,9 @@ func main() {
 		log.Println(err)
 		log.Fatal("database connect error")
 	}
-	sender := transactionresponse.NewSender()
-	wr := workerpool.NewWorker(db, sender)
-	pr := proccesor.NewProcessor(wr)
+	sender := response.NewSender()
+	wr := workerpool.NewWorker(db)
+	pr := proccesor.NewProcessor(wr, sender)
 	http.HandleFunc("/form", handlers.HandleBalanceChanger(pr))
 	err = http.ListenAndServe("0.0.0.0:80", nil)
 	log.Fatal("err here`:", err)

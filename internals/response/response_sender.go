@@ -1,4 +1,4 @@
-package transactionresponse
+package response
 
 import (
 	"encoding/json"

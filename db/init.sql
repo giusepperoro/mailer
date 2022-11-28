@@ -9,10 +9,6 @@ CREATE TABLE IF NOT EXISTS accounts (
     PRIMARY KEY(client_id)
     );
 
-INSERT INTO accounts (balance) VALUES (
-    5000
-    );
-
 -- Creation of orders table
 CREATE TABLE IF NOT EXISTS orders (
     client_id BIGINT NOT NULL,
