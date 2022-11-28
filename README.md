@@ -1,1 +1,1 @@
-# github.com/giusepperoro/mailer
+# github.com/giusepperoro/requestqueue

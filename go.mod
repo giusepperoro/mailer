@@ -1,4 +1,4 @@
-module github.com/requestqueue/mailer
+module github.com/giusepperoro/requestqueue
 
 go 1.18
 
