@@ -18,7 +18,7 @@ type dataBase struct {
 
 func New(ctx context.Context) (*dataBase, error) {
 
-	connection, err := pgxpool.Connect(ctx, "postgres://postgres:postgres@0.0.0.0:5432/master")
+	connection, err := pgxpool.Connect(ctx, "postgres://postgres:postgres@database:5432/master")
 	if err != nil {
 		return nil, err
 	}
